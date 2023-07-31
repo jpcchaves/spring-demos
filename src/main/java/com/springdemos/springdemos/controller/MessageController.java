@@ -5,6 +5,10 @@ import com.lowagie.text.DocumentException;
 import com.springdemos.springdemos.entity.Pet;
 import com.springdemos.springdemos.service.usecases.MessageService;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
+import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -65,9 +69,42 @@ public class MessageController {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
-        String filename = "pet_id_card.pdf";
+        String filename = "templates/pet_id_card.pdf";
         headers.setContentDispositionFormData(filename, filename);
 
         return new ResponseEntity<>(outputStream.toByteArray(), headers, HttpStatus.OK);
+    }
+
+    @GetMapping("/generate-pet-id")
+    public ResponseEntity<byte[]> generateIdCard() {
+        try {
+            ClassPathResource templateResource = new ClassPathResource("/templates/pet_id_card.pdf");
+            PDDocument pdfDocument = PDDocument.load(templateResource.getInputStream());
+
+            PDDocumentCatalog docCatalog = pdfDocument.getDocumentCatalog();
+            PDAcroForm acroForm = docCatalog.getAcroForm();
+
+            String name = "Momo22!!!";
+            String age = "24 anos e 6 meses";
+            String gender = "MINHA GATA";
+            String breed = "MAGAGA BRANGA";
+
+            acroForm.getField("name").setValue(name);
+            acroForm.getField("age").setValue(age);
+            acroForm.getField("breed").setValue(breed);
+            acroForm.getField("gender").setValue(gender);
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            pdfDocument.save(outputStream);
+            pdfDocument.close();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+
+            return new ResponseEntity<>(outputStream.toByteArray(), headers, HttpStatus.OK);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
