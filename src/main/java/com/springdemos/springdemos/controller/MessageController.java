@@ -84,10 +84,10 @@ public class MessageController {
             PDDocumentCatalog docCatalog = pdfDocument.getDocumentCatalog();
             PDAcroForm acroForm = docCatalog.getAcroForm();
 
-            String name = "Momo22!!!";
+            String name = "Antonio";
             String age = "24 anos e 6 meses";
-            String gender = "MINHA GATA";
-            String breed = "MAGAGA BRANGA";
+            String gender = "INDEFINIDO";
+            String breed = "Veado Suiço";
 
             acroForm.getField("name").setValue(name);
             acroForm.getField("age").setValue(age);
