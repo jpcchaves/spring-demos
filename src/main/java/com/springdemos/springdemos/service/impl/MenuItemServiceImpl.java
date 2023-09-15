@@ -6,9 +6,7 @@ import com.springdemos.springdemos.service.usecases.MenuItemService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class MenuItemServiceImpl implements MenuItemService {
@@ -19,39 +17,38 @@ public class MenuItemServiceImpl implements MenuItemService {
         this.menuItemRepository = menuItemRepository;
     }
 
-    @Override
-    public List<MenuItem> getMenuItems() {
-        List<MenuItem> items = menuItemRepository.findAll();
-
-        return groupMenuItems(items);
-    }
-
-    public List<MenuItem> groupMenuItems(List<MenuItem> menuItems) {
-        Map<Long, List<MenuItem>> parentChildrenMap = new HashMap<>();
-
-        for (MenuItem item : menuItems) {
-            Long parentId = item.getParentId();
-            parentChildrenMap.putIfAbsent(parentId, new ArrayList<>());
-            parentChildrenMap.get(parentId).add(item);
-        }
-
-        return buildMenuTree(null, parentChildrenMap);
-    }
-
-    private List<MenuItem> buildMenuTree(
-            Long parentId,
-            Map<Long, List<MenuItem>> parentChildrenMap) {
+    public static List<MenuItem> buildMenuTree(List<MenuItem> flatMenuItems) {
         List<MenuItem> menuTree = new ArrayList<>();
 
-        List<MenuItem> children = parentChildrenMap.get(parentId);
-        if (children != null) {
-            for (MenuItem child : children) {
-                List<MenuItem> subtree = buildMenuTree(child.getId(), parentChildrenMap);
-                child.setSubItems(subtree);
-                menuTree.add(child);
+        for (MenuItem menuItem : flatMenuItems) {
+            if (menuItem.getParent() == null) {
+                menuTree.add(menuItem);
+            } else {
+                MenuItem parent = findMenuItemById(menuTree, menuItem.getParent().getId());
+                if (parent != null) {
+                    parent.getSubItems().add(menuItem);
+                }
             }
         }
 
         return menuTree;
+    }
+
+    private static MenuItem findMenuItemById(
+            List<MenuItem> menuItems,
+            Long id) {
+        for (MenuItem menuItem : menuItems) {
+            if (menuItem.getId().equals(id)) {
+                return menuItem;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public List<MenuItem> getMenuItems() {
+        List<MenuItem> items = menuItemRepository.findAll();
+
+        return buildMenuTree(items);
     }
 }
