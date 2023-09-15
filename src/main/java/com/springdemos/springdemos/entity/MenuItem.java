@@ -1,5 +1,6 @@
 package com.springdemos.springdemos.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -11,9 +12,15 @@ public class MenuItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private Long parentId;
 
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    @JsonIgnore
+    private MenuItem parent;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     private List<MenuItem> subItems;
+
 
     public MenuItem() {
     }
@@ -21,11 +28,11 @@ public class MenuItem {
     public MenuItem(
             Long id,
             String name,
-            Long parentId,
+            MenuItem parent,
             List<MenuItem> subItems) {
         this.id = id;
         this.name = name;
-        this.parentId = parentId;
+        this.parent = parent;
         this.subItems = subItems;
     }
 
@@ -45,12 +52,12 @@ public class MenuItem {
         this.name = name;
     }
 
-    public Long getParentId() {
-        return parentId;
+    public MenuItem getParent() {
+        return parent;
     }
 
-    public void setParentId(Long parentId) {
-        this.parentId = parentId;
+    public void setParent(MenuItem parent) {
+        this.parent = parent;
     }
 
     public List<MenuItem> getSubItems() {
