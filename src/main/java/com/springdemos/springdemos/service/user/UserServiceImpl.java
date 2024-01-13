@@ -7,7 +7,6 @@ import com.springdemos.springdemos.service.user.contracts.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -41,6 +40,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> listUser() {
         return userRepository.findAll();
+    }
+
+    @Override
+    public User getById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     @Override

@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -25,8 +24,13 @@ public class UserController {
         return ResponseEntity.ok(userService.listUser());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getById(@PathVariable(name = "id") Long id) {
+        return ResponseEntity.ok(userService.getById(id));
+    }
+
     @PostMapping
-    public ResponseEntity<User> createUser(@Valid @ModelAttribute UserCreateDto requestDto)  {
+    public ResponseEntity<User> createUser(@Valid @ModelAttribute UserCreateDto requestDto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(requestDto));
     }
 
