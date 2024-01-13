@@ -43,6 +43,24 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll();
     }
 
+    @Override
+    public User updateUser(Long id, UserCreateDto requestDto) {
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setName(requestDto.getName());
+
+        List<String> base64List = new ArrayList<>();
+
+        for (MultipartFile file : requestDto.getPictures()) {
+            String base64String = encodeMultipartFileWithPrefix(file);
+            base64List.add(base64String);
+        }
+
+        user.setProfilePicture(base64List);
+
+        return userRepository.save(user);
+    }
+
     private String encodeMultipartFileWithPrefix(MultipartFile file) {
         try {
             byte[] fileContent = file.getBytes();
