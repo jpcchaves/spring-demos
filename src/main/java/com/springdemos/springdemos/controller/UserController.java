@@ -26,7 +26,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<User> createUser(@Valid @ModelAttribute UserCreateDto requestDto) throws IOException {
+    public ResponseEntity<User> createUser(@Valid @ModelAttribute UserCreateDto requestDto)  {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(requestDto));
     }
 }

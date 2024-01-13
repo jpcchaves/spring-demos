@@ -21,7 +21,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User createUser(UserCreateDto userCreateDto) throws IOException {
+    public User createUser(UserCreateDto userCreateDto) {
         User user = new User();
 
         user.setName(userCreateDto.getName());
@@ -29,7 +29,7 @@ public class UserServiceImpl implements UserService {
         List<String> base64List = new ArrayList<>();
 
         for (MultipartFile file : userCreateDto.getPictures()) {
-            String base64String = Base64.getEncoder().encodeToString(file.getBytes());
+            String base64String = encodeMultipartFileWithPrefix(file);
             base64List.add(base64String);
         }
 
@@ -41,5 +41,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> listUser() {
         return userRepository.findAll();
+    }
+
+    private String encodeMultipartFileWithPrefix(MultipartFile file) {
+        try {
+            byte[] fileContent = file.getBytes();
+            String base64Encoded = Base64.getEncoder().encodeToString(fileContent);
+            return "data:" + file.getContentType() + ";base64," + base64Encoded;
+        } catch (Exception e) {
+            return null;
+        }
     }
 }
