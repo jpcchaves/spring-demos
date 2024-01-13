@@ -5,14 +5,16 @@ import com.springdemos.springdemos.entity.User;
 import com.springdemos.springdemos.repository.UserRepository;
 import com.springdemos.springdemos.service.user.contracts.UserService;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
+import java.io.IOException;
+import java.util.*;
 
 @Service
 public class UserServiceImpl implements UserService {
+    private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList("png", "jpeg", "jpg", "webp", "jfif");
+    private static final long MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
     private final UserRepository userRepository;
 
     public UserServiceImpl(UserRepository userRepository) {
@@ -65,13 +67,32 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
 
-    private String encodeMultipartFileWithPrefix(MultipartFile file) {
+    public String encodeMultipartFileWithPrefix(MultipartFile file) {
         try {
+            if (file.isEmpty()) {
+                throw new IllegalArgumentException("File is empty");
+            }
+
+            if (file.getSize() > MAX_FILE_SIZE_BYTES) {
+                throw new IllegalArgumentException("File size exceeds the allowed limit");
+            }
+
+            String originalFilename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+            String fileExtension = getFileExtension(originalFilename);
+            if (!ALLOWED_EXTENSIONS.contains(fileExtension.toLowerCase())) {
+                throw new IllegalArgumentException("Invalid file type. Allowed types are: " + ALLOWED_EXTENSIONS);
+            }
+
             byte[] fileContent = file.getBytes();
             String base64Encoded = Base64.getEncoder().encodeToString(fileContent);
             return "data:" + file.getContentType() + ";base64," + base64Encoded;
-        } catch (Exception e) {
+        } catch (IOException | IllegalArgumentException e) {
+            e.printStackTrace();
             return null;
         }
+    }
+
+    private String getFileExtension(String fileName) {
+        return fileName.substring(fileName.lastIndexOf(".") + 1);
     }
 }
