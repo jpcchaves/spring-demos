@@ -4,6 +4,7 @@ import com.springdemos.springdemos.data.dto.UserCreateDto;
 import com.springdemos.springdemos.entity.User;
 import com.springdemos.springdemos.repository.UserRepository;
 import com.springdemos.springdemos.service.user.contracts.UserService;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -70,17 +71,18 @@ public class UserServiceImpl implements UserService {
     public String encodeMultipartFileWithPrefix(MultipartFile file) {
         try {
             if (file.isEmpty()) {
-                throw new IllegalArgumentException("File is empty");
+                throw new RuntimeException("File is empty");
             }
 
             if (file.getSize() > MAX_FILE_SIZE_BYTES) {
-                throw new IllegalArgumentException("File size exceeds the allowed limit");
+                throw new RuntimeException("File size exceeds the allowed limit");
             }
 
             String originalFilename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
             String fileExtension = getFileExtension(originalFilename);
+            
             if (!ALLOWED_EXTENSIONS.contains(fileExtension.toLowerCase())) {
-                throw new IllegalArgumentException("Invalid file type. Allowed types are: " + ALLOWED_EXTENSIONS);
+                throw new RuntimeException("Invalid file type. Allowed types are: " + ALLOWED_EXTENSIONS);
             }
 
             byte[] fileContent = file.getBytes();
